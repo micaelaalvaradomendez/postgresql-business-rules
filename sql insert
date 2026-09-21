@@ -1,0 +1,440 @@
+-- poblacion de tablas
+
+--SUCURSALES
+INSERT INTO sucursal (nombre, telefono, ciudad, calle, numero_de_calle)
+VALUES
+    ('Sucursal Oeste', '011-4567-8901', 'Morón', 'Avenida Rivadavia', 18400),
+    ('Sucursal Mar del Plata', '0223-123-4567', 'Mar del Plata', 'Avenida Colón', 6700),
+    ('Sucursal Rosario', '0341-234-5678', 'Rosario', 'Boulevard Oroño', 1500),
+    ('Sucursal Córdoba', '0351-345-6789', 'Córdoba', 'Avenida General Paz', 1200),
+    ('Sucursal Salta', '0387-456-7890', 'Salta', 'Calle España', 350),
+    ('Sucursal Ushuaia', '02901-123-456', 'Ushuaia', 'Perito moreno', 500),
+    ('Sucursal Sur', '011-3456-7890', 'Lomas de Zamora', 'Hipólito Yrigoyen', 8700),
+    ('Sucursal Norte', '011-2345-6789', 'San Fernando', 'Ruta 197', 200),
+    ('Sucursal Central', '011-1234-5678', 'Buenos Aires', 'Avenida Corrientes', 1234);
+
+--EMPLEADOS
+INSERT INTO empleado (dni, id_sucursal, empleado, nombre, apellido, telefono, mail, calle, numero, codigo_postal)
+VALUES
+    (20345678, 
+(SELECT id_sucursal FROM sucursal WHERE nombre ='Sucursal Sur'),
+ 'gerente', 'Juan', 'Pérez', '011-5555-1111', 'juan.perez@example.com', 'Avenida Corrientes', 1234, 'C1043'),
+    (21345679,
+ (SELECT id_sucursal FROM sucursal WHERE nombre ='Sucursal Sur'),
+'limpieza', 'Maria', 'Gomez', '02901-555-123', 'maria.gomez@ushuaia.com', 'San Martín', 500, 'V9410'),
+    (22345680,
+(SELECT id_sucursal FROM sucursal WHERE nombre ='Sucursal Sur'), 
+ 'atencion_al_cliente', 'Carlos', 'Martínez', '0223-555-4567', 'carlos.martinez@mdp.com', 'Avenida Colón', 6700, 'B7600'),
+    (12345678,
+ (SELECT id_sucursal FROM sucursal WHERE nombre ='Sucursal Norte'),
+ 'gerente', 'Juan', 'Pérez', '111222333', 'juan.perez@mail.com', 'Calle A', 1000, 'C1043'),
+    (23456789, 
+(SELECT id_sucursal FROM sucursal WHERE nombre ='Sucursal Norte'),
+ 'atencion_al_cliente', 'Ana', 'Gomez', '222333444', 'ana.gomez@mail.com', 'Calle B', 2000, 'V9410'),
+    (34567890,
+ (SELECT id_sucursal FROM sucursal WHERE nombre ='Sucursal Norte'),
+ 'limpieza', 'Luis', 'Martínez', '333444555', 'luis.martinez@mail.com', 'Calle C', 3000, 'B7600'),
+    (45678901,
+ (SELECT id_sucursal FROM sucursal WHERE nombre ='Sucursal Central'),
+ 'atencion_al_cliente', 'Carlos', 'Fernández', '444555666', 'carlos.fernandez@mail.com', 'Calle D', 4000, 'C1043'),
+    (56789012, 
+(SELECT id_sucursal FROM sucursal WHERE nombre ='Sucursal Central'),
+ 'gerente', 'Laura', 'Rodríguez', '555666777', 'laura.rodriguez@mail.com', 'Calle E', 5000, 'V9410'),
+    (21345673,
+ (SELECT id_sucursal FROM sucursal WHERE nombre ='Sucursal Central'),
+ 'limpieza', 'Maria', 'Gomez', '02901-555-123', 'maria.fd@ushuaia.com', 'campos', 500, 'V9410'),
+    (37123462,
+ (SELECT id_sucursal FROM sucursal WHERE nombre ='Sucursal Central'),
+ 'limpieza', 'Sofía', 'Alvarez', '3414321234', 'sofia.alvarez@ejemplo.com', 'San Luis', 100, '2000'),
+    (38123463,
+ (SELECT id_sucursal FROM sucursal WHERE nombre ='Sucursal Central'),
+ 'atencion_al_cliente', 'Pedro', 'Ramírez', '3415432109', 'pedro.ramirez@ejemplo.com', 'San Luis', 110, '2000'),
+    (39123464,
+ (SELECT id_sucursal FROM sucursal WHERE nombre ='Sucursal Central'),
+ 'atencion_al_cliente', 'Elena', 'Ríos', '3416543210', 'elena.rios@ejemplo.com', 'San Luis', 120, '2000'),
+    (40123465,
+ (SELECT id_sucursal FROM sucursal WHERE nombre ='Sucursal Norte'),
+ 'limpieza', 'Mario', 'Vega', '3517654321', 'mario.vega@ejemplo.com', 'Sucre', 450, '5000'),
+    (41123466,
+ (SELECT id_sucursal FROM sucursal WHERE nombre ='Sucursal Norte'),
+ 'atencion_al_cliente', 'Juliana', 'Sosa', '3518765432', 'juliana.sosa@ejemplo.com', 'Sucre', 460, '5000'),
+    (42123467,
+ (SELECT id_sucursal FROM sucursal WHERE nombre ='Sucursal Norte'),
+ 'atencion_al_cliente', 'Ricardo', 'Mendoza', '3519876543', 'ricardo.mendoza@ejemplo.com', 'Sucre', 470, '5000'),
+    (43123468,
+ (SELECT id_sucursal FROM sucursal WHERE nombre ='Sucursal Central'),
+ 'limpieza', 'Lucía', 'Guzmán', '2611234567', 'lucia.guzman@ejemplo.com', 'Lavalle', 300, '5500'),
+    (44123469,
+ (SELECT id_sucursal FROM sucursal WHERE nombre ='Sucursal Central'),
+ 'atencion_al_cliente', 'Andrés', 'Ortiz', '2612345678', 'andres.ortiz@ejemplo.com', 'Lavalle', 310, '5500'),
+    (45123470,
+ (SELECT id_sucursal FROM sucursal WHERE nombre ='Sucursal Central'),
+ 'atencion_al_cliente', 'Marcela', 'Flores', '2613456789', 'marcela.flores@ejemplo.com', 'Lavalle', 320, '5500');
+
+-- SALAS
+
+INSERT INTO sala (id_sucursal, cant_asientos, sala)
+VALUES
+    (2, 100, '2D'),
+    (2, 120, '2D'),
+    (2, 150, '3D'),
+    (2, 80, '3D'),
+    (2, 90, 'IMAX'),
+    (3, 80, 'IMAX'),
+    (3, 100, '3D'),
+    (3, 130, '3D'),
+    (3, 70, '2D'),
+    (3, 80, '2D'),
+    (1, 120, '2D'),
+    (1, 140, '2D'),
+    (1, 160, 'IMAX'),
+    (1, 110, '3D'),
+    (1, 120, '3D');
+	
+-- proveedores
+INSERT INTO proveedor (cuit, mail, nombre, descripcion)
+VALUES
+    (30000001, 'proveedor1@cinearg.com', 'Distribuidora Nacional', 'Películas 2D y 3D'),
+    (30000002, 'proveedor2@cinearg.com', 'IMAX Corp', 'Películas IMAX'),
+    (30000003, 'proveedor3@cinearg.com', 'Snack Supplies', 'Proveedores de golosinas'),
+    (30000004, 'proveedor4@cinearg.com', 'Luz y Sonido SA', 'Equipamiento de iluminación y sonido para cines'),
+    (30000005, 'proveedor5@cinearg.com', 'Cine Equip', 'Proveedores de proyectores y pantallas'),
+    (30000006, 'proveedor6@cinearg.com', 'La Butaca Cómoda', 'Fabricación de asientos y mobiliario para cines'),
+    (30000007, 'proveedor7@cinearg.com', 'Cine Snacks', 'Distribuidores de alimentos y bebidas para cines'),
+    (30000008, 'proveedor8@cinearg.com', 'MultiDistribuidora', 'Proveedores de artículos promocionales y merchandising'),
+    (30000009, 'proveedor9@cinearg.com', 'Proyección Avanzada', 'Especialistas en sistemas de proyección digital'),
+    (30000010, 'proveedor10@cinearg.com', 'Distribuidora Cinema', 'Distribución de películas nacionales e internacionales'),
+    (30000011, 'proveedor11@cinearg.com', 'IMAX Plus', 'Proveedores de tecnología IMAX avanzada para grandes salas'),
+    (30000012, 'proveedor12@cinearg.com', 'Promo Cine', 'Proveedores de publicidad y material promocional para cine'),
+    (30000013, 'proveedor13@cinearg.com', 'Ticket Master', 'Sistemas de venta de tickets y reservas'),
+    (30000014, 'proveedor14@cinearg.com', 'Efectos Visuales', 'Proveedores de efectos visuales y técnicos de cine'),
+    (30000015, 'proveedor15@cinearg.com', 'Sonido Surround', 'Distribuidores de sistemas de sonido envolvente para cines');
+
+
+INSERT INTO kiosko (id_sucursal)
+VALUES
+    (8),
+    (8),
+    (8),
+    (8),
+    (8),
+    (8),
+    (9),
+    (9),
+    (9),
+    (9),
+  	(7),
+  	(7),
+  	(7),
+  	(7),
+  	(7);
+
+-- articulos
+INSERT INTO articulo (codigo, nombre, precio)
+VALUES
+    (1234567890123, 'Palomitas de Maíz', 5.5),
+    (1234567890125, 'Chocolate', 3.75),
+    (1234567890126, 'Nachos', 6),
+    (1234567890127, 'Gaseosa Grande', 5),
+    (1234567890128, 'Gaseosa Mediana', 4),
+    (1234567890129, 'Agua Mineral', 3),
+    (1234567890131, 'pancho', 4.5),
+    (1234567890132, 'Helado', 3.5),
+    (1234567890133, 'Caramelos', 2),
+    (1234567890134, 'Galletas de Chocolate', 2.5),
+    (1234567890135, 'Almendras con Chocolate', 4.25),
+    (1234567890137, 'Gomitas de Frutas', 2.75),
+    (1234567890139, 'Té Helado', 3.25),
+    (1234567890140, 'Energizante', 5.75),
+    (1234567890141, 'Pizza Individual', 7);
+
+-- clientes
+INSERT INTO cliente (dni, mail)
+VALUES
+    (23456789, 'cliente1@example.com'),
+    (24567890, 'cliente2@example.com'),
+    (25678901, 'cliente3@example.com'),
+    (26789012, 'cliente4@example.com'),
+    (27890123, 'cliente5@example.com'),
+    (28901234, 'cliente6@example.com'),
+    (29012345, 'cliente7@example.com'),
+    (30123456, 'cliente8@example.com'),
+    (31234567, 'cliente9@example.com'),
+    (32345678, 'cliente10@example.com'),
+    (33456789, 'cliente11@example.com'),
+    (34567890, 'cliente12@example.com'),
+    (35678901, 'cliente13@example.com');
+
+-- publicidades
+INSERT INTO publicidad (duracion, clasificacion, publicidad)
+VALUES
+    ('00:01:30', 'P-13', 'trailer'),
+    ('00:02:00', 'P-16', 'publicidad_negocio'),
+    ('00:01:45', 'P-18', 'promocion_sucursal'),
+    ('00:01:15', 'ATP', 'trailer'),
+    ('00:02:30', 'P-13', 'publicidad_negocio'),
+    ('00:01:00', 'P-16', 'promocion_sucursal'),
+    ('00:02:00', 'P-18', 'trailer'),
+    ('00:01:20', 'P-21', 'publicidad_negocio'),
+    ('00:01:45', 'ATP', 'promocion_sucursal'),
+    ('00:03:00', 'P-13', 'trailer'),
+    ('00:01:50', 'P-16', 'publicidad_negocio'),
+    ('00:02:15', 'P-18', 'promocion_sucursal'),
+    ('00:01:30', 'P-21', 'trailer');
+
+-- espacio publicitario
+INSERT INTO espacio_publicitario (clasificacion)
+VALUES
+    ('ATP'),
+    ('ATP'),
+    ('ATP'),
+    ('P-13'),
+    ('P-13'),
+    ('P-13'),
+    ('P-13'),
+    ('P-16'),
+    ('P-16'),
+    ('P-18'),
+    ('P-18'),
+    ('P-21'),
+    ('P-21');
+
+--cartelera
+INSERT INTO cartelera (fecha) VALUES
+(CURRENT_DATE),
+(CURRENT_DATE + INTERVAL '1 day'),
+  ('2024-11-15'),
+  ('2024-11-16'),
+  ('2024-11-17'),
+  ('2024-10-15'),
+  ('2024-10-16'),
+  ('2024-10-17');
+
+-- peliculas
+INSERT INTO pelicula (titulo, genero, trailer, sinopsis, duracion, clasificacion)
+VALUES
+    ('Película A', 'Acción', '00:02:30', 'Una gran aventura', '01:30:00', 'P-13'),
+    ('Película B', 'Drama', '00:01:45', 'Una historia conmovedora', '01:45:00', 'P-16'),
+    ('Película C', 'Ciencia Ficción', '00:03:00', 'Viaje al futuro', '02:00:00', 'P-18'),
+    ('Película D', 'Comedia', '00:02:00', 'Risas y enredos en un día inesperado', '01:35:00', 'ATP'),
+    ('Película E', 'Terror', '00:01:50', 'Un escalofriante misterio en la oscuridad', '01:40:00', 'P-16'),
+    ('Película F', 'Animación', '00:02:15', 'Una aventura mágica para todas las edades', '01:20:00', 'ATP'),
+    ('Película G', 'Romance', '00:01:30', 'Un romance inesperado en la gran ciudad', '01:50:00', 'P-13'),
+    ('Película H', 'Documental', '00:02:20', 'La vida de los océanos', '01:30:00', 'ATP'),
+    ('Película I', 'Fantasía', '00:02:45', 'Un reino de magia y leyendas', '02:10:00', 'P-13'),
+    ('Película J', 'Thriller', '00:03:00', 'Una intensa búsqueda de la verdad', '02:05:00', 'P-18'),
+    ('Película K', 'Aventura', '00:01:40', 'Explorando territorios desconocidos', '01:55:00', 'P-16'),
+    ('Película L', 'Ciencia Ficción', '00:02:50', 'La humanidad en el espacio', '02:20:00', 'P-21'),
+    ('Película M', 'Musical', '00:01:55', 'Canciones y sueños en el escenario', '01:45:00', 'ATP');
+
+INSERT INTO funcion (codigo_pelicula, codigo_cartelera, cod_espacio_publicitario, tipo_pelicula, idioma)
+VALUES
+   
+( (SELECT codigo_pelicula FROM pelicula WHERE titulo = 'Película A'), 1, 4, '3D', 'Inglés'),
+( (SELECT codigo_pelicula FROM pelicula WHERE titulo = 'Película A'), 1, 1, '2D','Español'),
+( (SELECT codigo_pelicula FROM pelicula WHERE titulo = 'Película B'), 1, 2, '3D', 'Inglés'),
+( (SELECT codigo_pelicula FROM pelicula WHERE titulo = 'Película M'), 1, 3, 'IMAX','Español'),
+( (SELECT codigo_pelicula FROM pelicula WHERE titulo = 'Película C'), 2, 5, '3D', 'Español'),
+( (SELECT codigo_pelicula FROM pelicula WHERE titulo = 'Película G'), 2, 6, '2D', 'Inglés'),
+( (SELECT codigo_pelicula FROM pelicula WHERE titulo = 'Película J'), 2, 7, '3D', 'Español'),
+( (SELECT codigo_pelicula FROM pelicula WHERE titulo = 'Película M'), 2, 8, '2D', 'Inglés'),
+( (SELECT codigo_pelicula FROM pelicula WHERE titulo = 'Película D'), 3, 9, '2D', 'Español'),
+( (SELECT codigo_pelicula FROM pelicula WHERE titulo = 'Película A'), 3, 10, 'IMAX', 'Inglés'),
+ ( (SELECT codigo_pelicula FROM pelicula WHERE titulo = 'Película C'), 3, 9, '2D', 'Español'),
+( (SELECT codigo_pelicula FROM pelicula WHERE titulo = 'Película G'), 3, 10, 'IMAX', 'Inglés');
+
+--horario
+INSERT INTO horario (codigo_pelicula, codigo_cartelera, hora_inicio)
+VALUES
+    ( (SELECT codigo_pelicula FROM pelicula WHERE titulo = 'Película A'), 1, '14:00:00'),
+    ( (SELECT codigo_pelicula FROM pelicula WHERE titulo = 'Película B'), 1, '16:00:00'),
+    ( (SELECT codigo_pelicula FROM pelicula WHERE titulo = 'Película M'), 1, '20:00:00'),
+    ( (SELECT codigo_pelicula FROM pelicula WHERE titulo = 'Película A'), 1, '22:00:00'),
+    ( (SELECT codigo_pelicula FROM pelicula WHERE titulo = 'Película C'), 2, '14:00:00'),
+    ( (SELECT codigo_pelicula FROM pelicula WHERE titulo = 'Película G'), 2, '16:00:00'),
+    ( (SELECT codigo_pelicula FROM pelicula WHERE titulo = 'Película J'), 2, '20:00:00'),
+    ( (SELECT codigo_pelicula FROM pelicula WHERE titulo = 'Película M'), 2, '22:00:00'),
+    ( (SELECT codigo_pelicula FROM pelicula WHERE titulo = 'Película D'), 3, '14:00:00'),
+    ( (SELECT codigo_pelicula FROM pelicula WHERE titulo = 'Película A'), 3, '16:00:00'),
+    ( (SELECT codigo_pelicula FROM pelicula WHERE titulo = 'Película C'), 3, '18:00:00'),
+    ( (SELECT codigo_pelicula FROM pelicula WHERE titulo = 'Película G'), 3, '20:00:00');
+
+-- asignar horario a la funcion
+UPDATE funcion f
+SET id_horario = h.id_horario
+FROM horario h
+WHERE f.codigo_pelicula = h.codigo_pelicula
+  AND f.codigo_cartelera = h.codigo_cartelera
+  AND f.id_horario IS NULL;
+
+
+-- entradas
+INSERT INTO entrada (id_funcion, nro_asiento, entrada)
+VALUES
+    (1, 1, 'online'),
+    (2, 4, 'kiosko'),
+    (3, 10, 'online'),
+    (4, 18, 'kiosko'),
+    (5, 30, 'online'),
+    (6, 4, 'kiosko'),
+    (7, 8, 'online'),
+    (8, 12, 'kiosko'),
+    (9, 22, 'online'),
+    (10, 27, 'kiosko');
+	
+-- vende
+INSERT INTO vende (id_kiosko, id_articulo)
+VALUES
+(
+( SELECT id_kiosko FROM kiosko WHERE id_sucursal = (SELECT id_sucursal FROM sucursal WHERE nombre = 'Sucursal Central') LIMIT 1) , 1
+),
+(
+( SELECT id_kiosko FROM kiosko WHERE id_sucursal = (SELECT id_sucursal FROM sucursal WHERE nombre = 'Sucursal Central') LIMIT 1) , 2
+),
+(
+( SELECT id_kiosko FROM kiosko WHERE id_sucursal = (SELECT id_sucursal FROM sucursal WHERE nombre = 'Sucursal Central') LIMIT 1) , 8
+),
+(
+( SELECT id_kiosko FROM kiosko WHERE id_sucursal = (SELECT id_sucursal FROM sucursal WHERE nombre = 'Sucursal Central') LIMIT 1) , 12
+),
+(
+( SELECT id_kiosko FROM kiosko WHERE id_sucursal = (SELECT id_sucursal FROM sucursal WHERE nombre = 'Sucursal Central') LIMIT 1) , 5
+),
+(
+( SELECT id_kiosko FROM kiosko WHERE id_sucursal = (SELECT id_sucursal FROM sucursal WHERE nombre = 'Sucursal Sur') LIMIT 1) , 1
+),
+(
+( SELECT id_kiosko FROM kiosko WHERE id_sucursal = (SELECT id_sucursal FROM sucursal WHERE nombre = 'Sucursal Sur') LIMIT 1) , 2
+),
+(
+( SELECT id_kiosko FROM kiosko WHERE id_sucursal = (SELECT id_sucursal FROM sucursal WHERE nombre = 'Sucursal Sur') LIMIT 1) , 8
+),
+(
+( SELECT id_kiosko FROM kiosko WHERE id_sucursal = (SELECT id_sucursal FROM sucursal WHERE nombre = 'Sucursal Sur') LIMIT 1) , 12
+),
+(
+( SELECT id_kiosko FROM kiosko WHERE id_sucursal = (SELECT id_sucursal FROM sucursal WHERE nombre = 'Sucursal Sur') LIMIT 1) , 14
+),
+
+(
+( SELECT id_kiosko FROM kiosko WHERE id_sucursal = (SELECT id_sucursal FROM sucursal WHERE nombre = 'Sucursal Norte') LIMIT 1) , 1
+),
+(
+( SELECT id_kiosko FROM kiosko WHERE id_sucursal = (SELECT id_sucursal FROM sucursal WHERE nombre = 'Sucursal Norte') LIMIT 1) , 3
+),
+(
+( SELECT id_kiosko FROM kiosko WHERE id_sucursal = (SELECT id_sucursal FROM sucursal WHERE nombre = 'Sucursal Norte') LIMIT 1) , 8
+),
+(
+( SELECT id_kiosko FROM kiosko WHERE id_sucursal = (SELECT id_sucursal FROM sucursal WHERE nombre = 'Sucursal Norte') LIMIT 1) , 12
+),
+(
+( SELECT id_kiosko FROM kiosko WHERE id_sucursal = (SELECT id_sucursal FROM sucursal WHERE nombre = 'Sucursal Norte') LIMIT 1) , 14
+);
+
+
+-- pproyecta
+INSERT INTO proyecta (nro_sala, id_funcion) VALUES
+    (1, 1),
+    (2, 2),
+    (3, 3),
+    (4, 4),
+    (5, 5),
+    (6, 6),
+    (7, 7),
+    (8, 8),  
+    (9, 9),      
+    (10, 10), 
+    (1, 11), 
+    (12, 12); 
+
+-- Relacionando publicidades con espacios publicitarios basados en clasificación
+INSERT INTO compone (cod_publicidad, cod_espacio_publicitario) VALUES
+    (1, 4),    -- P-13
+    (1, 5),    -- P-13
+    (2, 8),    -- P-16
+    (2, 9),    -- P-16
+    (3, 10),   -- P-18
+    (3, 11),   -- P-18
+    (4, 1),    -- ATP
+    (4, 2),    -- ATP
+    (5, 6),    -- P-13
+    (6, 8),    -- P-16
+    (7, 10),   -- P-18
+    (8, 12),   -- P-21
+    (9, 3),    -- ATP
+    (10, 7),   -- P-13
+    (11, 9),   -- P-16
+    (12, 11),  -- P-18
+    (13, 13);  -- P-21
+
+
+-- cliente y kiosko donde compro
+INSERT INTO compra_en (id_kiosko, id_cliente) VALUES
+    (4, 
+( SELECT id_cliente FROM cliente WHERE dni = 23456789 ) ),
+    (5, 
+( SELECT id_cliente FROM cliente WHERE dni = 24567890 ) ),
+    (6, 
+( SELECT id_cliente FROM cliente WHERE dni = 25678901 ) ),
+    (7, 
+( SELECT id_cliente FROM cliente WHERE dni = 24567890 ) ), 
+    (8, 
+( SELECT id_cliente FROM cliente WHERE dni = 25678901 ) ), 
+    (9, 
+( SELECT id_cliente FROM cliente WHERE dni = 26789012 ) ),
+    (10, 
+( SELECT id_cliente FROM cliente WHERE dni = 32345678 ) ), 
+    (11, 
+( SELECT id_cliente FROM cliente WHERE dni = 33456789 ) ), 
+    (10, 
+( SELECT id_cliente FROM cliente WHERE dni = 34567890 ) ), 
+    (9, 
+( SELECT id_cliente FROM cliente WHERE dni = 35678901 ) ), 
+    (8, 
+( SELECT id_cliente FROM cliente WHERE dni = 23456789 ) );
+
+
+INSERT INTO administra_la (id_empleado, id_funcion) VALUES
+((SELECT legajo FROM empleado WHERE dni =20345678) ,7),
+((SELECT legajo FROM empleado WHERE dni =12345678) ,10),
+((SELECT legajo FROM empleado WHERE dni =56789012) ,11);
+
+-- clientes y sus entradas
+INSERT INTO compra_la (id_cliente, id_entrada) VALUES
+
+
+    ((SELECT id_cliente FROM cliente WHERE dni =26789012 ), 1),
+    ((SELECT id_cliente FROM cliente WHERE dni =24567890 ), 2),
+    ((SELECT id_cliente FROM cliente WHERE dni =25678901 ), 3),
+    ((SELECT id_cliente FROM cliente WHERE dni =26789012 ), 4),
+    ((SELECT id_cliente FROM cliente WHERE dni =27890123 ), 5),
+    ((SELECT id_cliente FROM cliente WHERE dni =24567890 ), 6),
+    ((SELECT id_cliente FROM cliente WHERE dni =29012345 ), 7),
+    ((SELECT id_cliente FROM cliente WHERE dni =25678901 ), 8),
+    ((SELECT id_cliente FROM cliente WHERE dni =23456789 ), 9),
+    ((SELECT id_cliente FROM cliente WHERE dni =28901234 ), 10);
+
+-- empleado y la sala que limpia
+INSERT INTO limpia_la (id_empleado, nro_sala) VALUES
+    (9,1),
+    (10, 2),
+    (6, 4),
+    (13, 4),
+    (2, 6),
+    (16, 6);
+
+
+-- kiosko y sus proveedores
+INSERT INTO Provee (id_proveedor, id_kiosko) VALUES
+(1,4),
+(2,5),
+(3,6),
+(12,7),
+(6,5),
+(2,6),
+(15,10),
+(1,13),
+(7,7),
+(8,4),
+(1,5);

@@ -1,0 +1,48 @@
+/* CONSULTAS */
+
+
+--lista de empleados de lo empleados de limpieza, con su nombre y legajo, que salas limpiaron y a la sucursal a la que pertencen,
+--ordenados por sucursal y legajo
+
+SELECT e.nombre AS nombre_empleado,
+   	e.legajo,
+   	s.nombre AS sucursal,
+   	sala.nro_sala,
+   	sala.sala
+FROM empleado as e
+JOIN limpia_la as l ON e.legajo = l.id_empleado
+JOIN sala ON l.nro_sala = sala.nro_sala
+JOIN sucursal as s ON sala.id_sucursal = s.id_sucursal
+WHERE e.empleado = 'limpieza'
+ORDER BY s.nombre, e.legajo;
+
+--listado de publicidades de una funcion de una pelicula determinada, ordenada por tipo y clasificacion
+
+SELECT p.id_publicidad,
+   	p.publicidad AS tipo_publicidad,
+   	p.clasificacion,
+   	f.id_funcion,
+   	peli.titulo AS pelicula
+FROM publicidad as p
+JOIN compone ON p.id_publicidad = compone.cod_publicidad
+JOIN espacio_publicitario as ep ON compone.cod_espacio_publicitario = ep.cod_espacio_publicitario
+JOIN funcion as f ON ep.cod_espacio_publicitario = f.cod_espacio_publicitario
+JOIN pelicula as peli ON f.codigo_pelicula = peli.codigo_pelicula
+WHERE peli.titulo = 'Película A'  
+ORDER BY p.publicidad, p.clasificacion;
+
+--listado de todos los gerentes de cada sucursal
+
+SELECT e.nombre AS gerente,
+   	e.legajo,
+   	s.nombre AS sucursal
+FROM empleado as e
+JOIN sucursal as s ON e.id_sucursal = s.id_sucursal
+WHERE e.empleado = 'gerente'
+ORDER BY s.nombre, e.legajo;
+
+--nombre de las sucursales donde se presenta la misma pelicula
+
+SELECT DISTINCT sucursal.nombre FROM proyecta NATURAL JOIN sala NATURAL JOIN funcion 
+NATURAL JOIN pelicula NATURAL JOIN sucursal
+WHERE titulo = 'Película A' ORDER BY sucursal.nombre
