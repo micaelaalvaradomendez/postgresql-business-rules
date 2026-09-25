@@ -76,8 +76,9 @@ COMMENT ON FUNCTION fn_calcular_fin_funcion() IS
 -- ----------------------------------------------------------------------------
 -- 3. FUNCIÓN: Sincronización Automática del Rango de Proyección Física
 -- ----------------------------------------------------------------------------
--- Si al asignar una proyección física a sala no se especifica el rango_ocupacion,
--- se deriva de forma atómica a partir de [fecha_hora_inicio, fecha_hora_fin) de la función.
+-- El rango_ocupacion es un atributo derivado: siempre se toma de
+-- [fecha_hora_inicio, fecha_hora_fin) de la función. Cualquier valor provisto
+-- por el cliente se descarta, de modo que la exclusión GiST opere sobre datos reales.
 CREATE OR REPLACE FUNCTION fn_sincronizar_rango_proyeccion()
 RETURNS trigger
 LANGUAGE plpgsql
@@ -87,21 +88,19 @@ DECLARE
     v_inicio timestamptz;
     v_fin    timestamptz;
 BEGIN
-    IF NEW.rango_ocupacion IS NULL THEN
-        SELECT fecha_hora_inicio, fecha_hora_fin
-        INTO STRICT v_inicio, v_fin
-        FROM funcion
-        WHERE id_funcion = NEW.id_funcion;
+    SELECT fecha_hora_inicio, fecha_hora_fin
+    INTO STRICT v_inicio, v_fin
+    FROM funcion
+    WHERE id_funcion = NEW.id_funcion;
 
-        NEW.rango_ocupacion := tstzrange(v_inicio, v_fin, '[)');
-    END IF;
+    NEW.rango_ocupacion := tstzrange(v_inicio, v_fin, '[)');
 
     RETURN NEW;
 END;
 $$;
 
 COMMENT ON FUNCTION fn_sincronizar_rango_proyeccion() IS
-'Trigger function: auto-puebla el rango de ocupación [inicio, fin) en proyeccion a partir de funcion';
+'Trigger function: deriva siempre el rango de ocupación [inicio, fin) de proyeccion a partir de funcion';
 
 -- ----------------------------------------------------------------------------
 -- 4. FUNCIÓN: Propagación de Modificación de Horario a Proyecciones Físicas
@@ -327,6 +326,30 @@ $$;
 
 COMMENT ON FUNCTION fn_recalcular_espacio_publicitario() IS
 'Trigger function: recalcula reactivamente duración y clasificación máxima del espacio ante cambios en compone';
+
+-- ----------------------------------------------------------------------------
+-- 8.1 FUNCIÓN: Propagación de Cambios del Espacio Publicitario a Funciones
+-- ----------------------------------------------------------------------------
+-- Si cambia la duración o clasificación de un espacio ya asignado, las funciones
+-- que lo usan deben revalidarse. Re-asignar el mismo espacio dispara en cadena:
+-- recálculo de fecha_hora_fin (R-03), validación etaria (R-05) y propagación
+-- del rango a proyeccion, donde la exclusión GiST (R-01) revalida el solapamiento.
+CREATE OR REPLACE FUNCTION fn_propagar_espacio_a_funciones()
+RETURNS trigger
+LANGUAGE plpgsql
+SECURITY INVOKER
+AS $$
+BEGIN
+    UPDATE funcion
+    SET cod_espacio_publicitario = NEW.cod_espacio_publicitario
+    WHERE cod_espacio_publicitario = NEW.cod_espacio_publicitario;
+
+    RETURN NULL; -- Trigger de tipo AFTER
+END;
+$$;
+
+COMMENT ON FUNCTION fn_propagar_espacio_a_funciones() IS
+'Trigger function: revalida horario, clasificación y solapamiento de las funciones que usan un espacio publicitario modificado';
 
 -- ----------------------------------------------------------------------------
 -- 9. FUNCIÓN: Validación de Compatibilidad Etaria Película vs. Publicidad

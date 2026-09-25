@@ -167,6 +167,14 @@ INSERT INTO espacio_publicitario (cod_espacio_publicitario)
 OVERRIDING SYSTEM VALUE
 VALUES (1), (2), (3);
 
+-- OVERRIDING SYSTEM VALUE no avanza la secuencia identity: se sincroniza para
+-- que las próximas altas no colisionen con los códigos cargados explícitamente.
+DO $$
+BEGIN
+    PERFORM setval(pg_get_serial_sequence('espacio_publicitario', 'cod_espacio_publicitario'),
+                   (SELECT max(cod_espacio_publicitario) FROM espacio_publicitario));
+END $$;
+
 -- Componer Espacio 1: Apto Todo Público (ATP)
 -- Piezas: Trailer ATP (120s) + Publicidad Negocio (45s) + Promo Sucursal (60s) = 225 seg
 INSERT INTO compone (cod_espacio_publicitario, cod_publicidad)

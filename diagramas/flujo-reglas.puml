@@ -1,0 +1,60 @@
+@startuml flujo-reglas
+' ============================================================================
+' Cadena de validación en motor al modificar la publicidad de un espacio en uso.
+' Una sola sentencia sobre compone dispara, en la misma transacción, todas las
+' reglas que dependen de ella. Si cualquier eslabón falla, se revierte todo.
+' Render: docker run --rm -u "$(id -u):$(id -g)" -v "$PWD/diagramas:/data" \
+'         plantuml/plantuml -charset UTF-8 -tpng /data/flujo-reglas.puml
+' ============================================================================
+!theme plain
+skinparam dpi 150
+skinparam shadowing false
+skinparam defaultFontName "DejaVu Sans"
+skinparam sequenceMessageAlign left
+skinparam responseMessageBelowArrow true
+skinparam note {
+  BackgroundColor #FFF8E1
+  BorderColor #C9A227
+}
+
+title Cadena de reglas en motor: alta de una pieza publicitaria
+
+actor "Cliente SQL" as C
+database "compone" as CO
+database "espacio_publicitario" as EP
+database "funcion" as F
+database "proyeccion" as P
+
+C -> CO : INSERT INTO compone (espacio, publicidad)
+
+CO -> EP : **trg_compone_recalcular_espacio** (AFTER)\nUPDATE duracion_seg = SUM(piezas),\n       clasificacion = MAX(piezas)
+note right of CO : R-09 / R-10
+
+EP -> F : **trg_espacio_propagar_a_funciones** (AFTER)\nUPDATE funcion SET cod_espacio = cod_espacio\n(solo si cambió duración o clasificación)
+
+activate F
+F -> F : **trg_funcion_calcular_fin** (BEFORE)\nfin = inicio + película + publicidad + 20 min
+note right of F : R-03
+F -> F : **trg_funcion_validar_clasificacion** (BEFORE)
+alt clasificación del espacio > película
+  F --> C : ERROR 23514 check_violation\n"Incompatibilidad etaria"
+  note over C, P #FFEBEE : Se revierte la sentencia completa, incluido el INSERT en compone
+end
+note right of F : R-05
+
+F -> P : **trg_funcion_propagar_horario** (AFTER)\nUPDATE rango_ocupacion\nWHEN (OLD.fin IS DISTINCT FROM NEW.fin)
+deactivate F
+
+activate P
+P -> P : **trg_proyeccion_sincronizar_rango** (BEFORE)\nrango = [inicio, fin) de la función
+P -> P : **EXCLUDE USING gist**\n(nro_sala WITH =, rango_ocupacion WITH &&)
+alt el nuevo rango se solapa con otra función de la sala
+  P --> C : ERROR 23P01 exclusion_violation
+  note over C, P #FFEBEE : Se revierte la sentencia completa
+end
+note right of P : R-01
+deactivate P
+
+P --> C : INSERT 0 1 — todas las reglas se mantienen
+
+@enduml

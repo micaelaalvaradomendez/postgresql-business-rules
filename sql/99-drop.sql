@@ -7,6 +7,15 @@
 -- ============================================================================
 
 -- ----------------------------------------------------------------------------
+-- 0. ELIMINACIÓN DE VISTAS
+-- ----------------------------------------------------------------------------
+
+DROP VIEW IF EXISTS v_limpieza_por_sala;
+DROP VIEW IF EXISTS v_gerente_por_sucursal;
+DROP VIEW IF EXISTS v_publicidad_por_funcion;
+DROP VIEW IF EXISTS v_programacion;
+
+-- ----------------------------------------------------------------------------
 -- 1. ELIMINACIÓN DE TABLAS (Orden inverso de dependencias referenciales)
 -- ----------------------------------------------------------------------------
 
@@ -42,6 +51,7 @@ DROP TABLE IF EXISTS sucursal CASCADE;
 
 DROP FUNCTION IF EXISTS fn_validar_cartelera_publicable(integer) CASCADE;
 DROP FUNCTION IF EXISTS fn_validar_clasificacion_espacio_pelicula() CASCADE;
+DROP FUNCTION IF EXISTS fn_propagar_espacio_a_funciones() CASCADE;
 DROP FUNCTION IF EXISTS fn_recalcular_espacio_publicitario() CASCADE;
 DROP FUNCTION IF EXISTS fn_validar_numero_asiento() CASCADE;
 DROP FUNCTION IF EXISTS fn_validar_sucursal_proyeccion() CASCADE;
@@ -73,4 +83,14 @@ DROP TYPE IF EXISTS tipo_empleado CASCADE;
 -- ----------------------------------------------------------------------------
 -- Se mantiene btree_gist si se utiliza en la base de datos o se elimina limpiamente:
 DROP EXTENSION IF EXISTS btree_gist CASCADE;
+DROP EXTENSION IF EXISTS dblink CASCADE; -- Usada solo por tests/03-concurrencia.sql
+
+-- ----------------------------------------------------------------------------
+-- 6. CONFIGURACIÓN DE BASE DE DATOS
+-- ----------------------------------------------------------------------------
+-- Revierte la zona horaria fijada en 01-schema.sql
+DO $$
+BEGIN
+    EXECUTE format('ALTER DATABASE %I RESET timezone', current_database());
+END $$;
 

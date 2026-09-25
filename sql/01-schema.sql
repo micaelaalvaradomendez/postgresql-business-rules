@@ -14,6 +14,20 @@
 CREATE EXTENSION IF NOT EXISTS btree_gist;
 
 -- ----------------------------------------------------------------------------
+-- 1.1 ZONA HORARIA OPERATIVA
+-- ----------------------------------------------------------------------------
+-- Los TIMESTAMPTZ se almacenan internamente en UTC; la zona horaria solo define
+-- cómo se interpretan los literales sin offset y cómo se presentan los resultados.
+-- Se fija a nivel base de datos (sesiones futuras) y en la sesión actual (seed).
+DO $$
+BEGIN
+    EXECUTE format('ALTER DATABASE %I SET timezone TO %L',
+                   current_database(), 'America/Argentina/Buenos_Aires');
+END $$;
+
+SET timezone TO 'America/Argentina/Buenos_Aires';
+
+-- ----------------------------------------------------------------------------
 -- 2. TIPOS ENUMERADOS Y DOMINIOS
 -- ----------------------------------------------------------------------------
 

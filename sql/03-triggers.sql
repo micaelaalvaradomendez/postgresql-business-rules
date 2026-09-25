@@ -10,10 +10,12 @@
 -- 1. TRIGGERS SOBRE TABLA: funcion
 -- ----------------------------------------------------------------------------
 
--- Trigger 1: Cálculo automático de fecha_hora_fin antes de persistir la función
+-- Trigger 1: Cálculo automático de fecha_hora_fin antes de persistir la función.
+-- Se dispara ante cualquier UPDATE (no solo UPDATE OF ...) para que
+-- duracion_total_min y fecha_hora_fin no puedan editarse manualmente.
 DROP TRIGGER IF EXISTS trg_funcion_calcular_fin ON funcion;
 CREATE TRIGGER trg_funcion_calcular_fin
-BEFORE INSERT OR UPDATE OF fecha_hora_inicio, codigo_pelicula, cod_espacio_publicitario
+BEFORE INSERT OR UPDATE
 ON funcion
 FOR EACH ROW
 EXECUTE FUNCTION fn_calcular_fin_funcion();
@@ -26,22 +28,27 @@ ON funcion
 FOR EACH ROW
 EXECUTE FUNCTION fn_validar_clasificacion_espacio_pelicula();
 
--- Trigger 3: Propagación de modificaciones horarias a las proyecciones en sala física
+-- Trigger 3: Propagación de modificaciones horarias a las proyecciones en sala física.
+-- Se usa WHEN en lugar de UPDATE OF: UPDATE OF solo considera las columnas del
+-- SET y no detecta el fecha_hora_fin recalculado por el Trigger 1 (p. ej. al
+-- cambiar la película o el espacio publicitario).
 DROP TRIGGER IF EXISTS trg_funcion_propagar_horario ON funcion;
 CREATE TRIGGER trg_funcion_propagar_horario
-AFTER UPDATE OF fecha_hora_inicio, fecha_hora_fin
+AFTER UPDATE
 ON funcion
 FOR EACH ROW
+WHEN (OLD.fecha_hora_inicio IS DISTINCT FROM NEW.fecha_hora_inicio
+      OR OLD.fecha_hora_fin IS DISTINCT FROM NEW.fecha_hora_fin)
 EXECUTE FUNCTION fn_actualizar_rango_proyecciones_de_funcion();
 
 -- ----------------------------------------------------------------------------
 -- 2. TRIGGERS SOBRE TABLA: proyeccion
 -- ----------------------------------------------------------------------------
 
--- Trigger 4: Auto-población de rango_ocupacion si se omite en la inserción
+-- Trigger 4: Derivación de rango_ocupacion desde la función (no editable manualmente)
 DROP TRIGGER IF EXISTS trg_proyeccion_sincronizar_rango ON proyeccion;
 CREATE TRIGGER trg_proyeccion_sincronizar_rango
-BEFORE INSERT
+BEFORE INSERT OR UPDATE
 ON proyeccion
 FOR EACH ROW
 EXECUTE FUNCTION fn_sincronizar_rango_proyeccion();
@@ -85,4 +92,18 @@ AFTER INSERT OR UPDATE OR DELETE
 ON compone
 FOR EACH ROW
 EXECUTE FUNCTION fn_recalcular_espacio_publicitario();
+
+-- ----------------------------------------------------------------------------
+-- 5. TRIGGERS SOBRE TABLA: espacio_publicitario
+-- ----------------------------------------------------------------------------
+
+-- Trigger 9: Revalidación en cascada de las funciones que usan el espacio modificado
+DROP TRIGGER IF EXISTS trg_espacio_propagar_a_funciones ON espacio_publicitario;
+CREATE TRIGGER trg_espacio_propagar_a_funciones
+AFTER UPDATE OF duracion_seg, clasificacion
+ON espacio_publicitario
+FOR EACH ROW
+WHEN (OLD.duracion_seg IS DISTINCT FROM NEW.duracion_seg
+      OR OLD.clasificacion IS DISTINCT FROM NEW.clasificacion)
+EXECUTE FUNCTION fn_propagar_espacio_a_funciones();
 

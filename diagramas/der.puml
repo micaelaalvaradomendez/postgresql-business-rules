@@ -1,0 +1,277 @@
+@startuml der
+' ============================================================================
+' Modelo relacional — Cadena de Cines Sunstar (22 tablas, PostgreSQL 16)
+' Render: docker run --rm -e PLANTUML_LIMIT_SIZE=16384 -u "$(id -u):$(id -g)" -v "$PWD/diagramas:/data" \
+'         plantuml/plantuml -charset UTF-8 -tpng /data/der.puml
+' Convención: * NOT NULL · <<PK>> clave primaria · <<FK>> clave foránea · <<UK>> única
+' ============================================================================
+!theme plain
+hide circle
+skinparam linetype ortho
+skinparam dpi 110
+skinparam shadowing false
+skinparam defaultFontName "DejaVu Sans"
+skinparam entity {
+  BackgroundColor #FFFFFF
+  BorderColor #444444
+}
+skinparam package {
+  BorderColor #999999
+  FontColor #555555
+}
+skinparam note {
+  BackgroundColor #FFF8E1
+  BorderColor #C9A227
+}
+
+title Modelo relacional — Cadena de Cines Sunstar
+
+package "Organización" {
+  entity sucursal {
+    * id_sucursal : integer <<PK>>
+    --
+    * nombre : varchar(50) <<UK>>
+    telefono : varchar(25)
+    * ciudad : varchar(40)
+    * calle : varchar(60)
+    * numero_de_calle : smallint
+  }
+
+  entity sala {
+    * nro_sala : integer <<PK>>
+    --
+    * id_sucursal : integer <<FK>>
+    * cant_asientos : smallint
+    * sala : tipo_sala  {2D, 3D, IMAX}
+  }
+
+  entity empleado {
+    * legajo : integer <<PK>>
+    --
+    * dni : integer <<UK>>
+    * id_sucursal : integer <<FK>>
+    * empleado : tipo_empleado
+    * nombre : varchar(40)
+    * apellido : varchar(40)
+    * telefono : varchar(25)
+    * mail : email
+    * calle : varchar(60)
+    * numero : smallint
+    codigo_postal : varchar(10)
+  }
+
+  entity limpia_la {
+    * id_empleado : integer <<PK, FK>>
+    * nro_sala : integer <<PK, FK>>
+  }
+
+  entity administra_la {
+    * id_empleado : integer <<PK, FK>>
+    * id_funcion : integer <<PK, FK>>
+  }
+}
+
+package "Programación" {
+  entity cartelera {
+    * codigo_cartelera : integer <<PK>>
+    --
+    * id_sucursal : integer <<FK>>
+    * fecha_inicio : date
+    * fecha_fin : date
+  }
+
+  entity pelicula {
+    * codigo_pelicula : integer <<PK>>
+    --
+    * titulo : varchar(80) <<UK>>
+    genero : varchar(30)
+    * trailer_min : smallint
+    sinopsis : text
+    * duracion_min : smallint
+    * clasificacion : clasificacion_pelicula
+  }
+
+  entity funcion {
+    * id_funcion : integer <<PK>>
+    --
+    * codigo_pelicula : integer <<FK>>
+    * codigo_cartelera : integer <<FK>>
+    cod_espacio_publicitario : integer <<FK>>
+    * tipo_pelicula : tipo_sala
+    * idioma : varchar(30)
+    * fecha_hora_inicio : timestamptz
+    * duracion_total_min : integer  (derivado)
+    * fecha_hora_fin : timestamptz  (derivado)
+  }
+
+  entity proyeccion {
+    * nro_sala : integer <<PK, FK>>
+    * id_funcion : integer <<PK, FK>>
+    --
+    * rango_ocupacion : tstzrange  (derivado)
+  }
+}
+
+package "Publicidad" {
+  entity espacio_publicitario {
+    * cod_espacio_publicitario : integer <<PK>>
+    --
+    * duracion_seg : integer  (derivado)
+    * clasificacion : clasificacion_pelicula  (derivado)
+  }
+
+  entity publicidad {
+    * id_publicidad : integer <<PK>>
+    --
+    * duracion_seg : integer
+    * clasificacion : clasificacion_pelicula
+    * publicidad : tipo_publicidad
+  }
+
+  entity compone {
+    * cod_espacio_publicitario : integer <<PK, FK>>
+    * cod_publicidad : integer <<PK, FK>>
+  }
+}
+
+package "Venta de entradas" {
+  entity entrada {
+    * codigo : integer <<PK>>
+    --
+    * nro_sala : integer <<FK>>
+    * id_funcion : integer <<FK>>
+    * nro_asiento : integer
+    * tipo_entrada : tipo_entrada
+    * precio : numeric(10,2)
+    * fecha_emision : timestamptz
+  }
+
+  entity cliente {
+    * id_cliente : integer <<PK>>
+    --
+    * dni : integer <<UK>>
+    * mail : email
+  }
+
+  entity compra_la {
+    * id_cliente : integer <<PK, FK>>
+    * id_entrada : integer <<PK, FK, UK>>
+    --
+    * fecha_compra : timestamptz
+  }
+}
+
+package "Kiosko" {
+  entity kiosko {
+    * id_kiosko : integer <<PK>>
+    --
+    * id_sucursal : integer <<FK, UK>>
+  }
+
+  entity articulo {
+    * id_articulo : integer <<PK>>
+    --
+    * codigo : ean13 <<UK>>
+    * nombre : varchar(60)
+    * precio : numeric(10,2)
+  }
+
+  entity proveedor {
+    * id_proveedor : integer <<PK>>
+    --
+    * cuit : bigint <<UK>>
+    * mail : email
+    * nombre : varchar(60)
+    descripcion : varchar(120)
+  }
+
+  entity vende {
+    * id_kiosko : integer <<PK, FK>>
+    * id_articulo : integer <<PK, FK>>
+  }
+
+  entity provee {
+    * id_proveedor : integer <<PK, FK>>
+    * id_kiosko : integer <<PK, FK>>
+  }
+
+  entity trabaja_en {
+    * id_empleado : integer <<PK, FK>>
+    * id_kiosko : integer <<PK, FK>>
+  }
+
+  entity compra_en {
+    * id_compra_kiosko : integer <<PK>>
+    --
+    * id_kiosko : integer <<FK>>
+    * id_cliente : integer <<FK>>
+    * fecha_compra : timestamptz
+  }
+}
+
+' --- Organización ---
+sucursal ||--o{ sala
+sucursal ||--o{ empleado
+sucursal ||--o| kiosko
+sucursal ||--o{ cartelera
+empleado ||--o{ limpia_la
+sala ||--o{ limpia_la
+empleado ||--o{ administra_la
+funcion ||--o{ administra_la
+
+' --- Programación ---
+cartelera ||--o{ funcion
+pelicula ||--o{ funcion
+espacio_publicitario |o--o{ funcion
+funcion ||--o{ proyeccion
+sala ||--o{ proyeccion
+
+' --- Publicidad ---
+espacio_publicitario ||--o{ compone
+publicidad ||--o{ compone
+
+' --- Venta ---
+proyeccion ||--o{ entrada
+cliente ||--o{ compra_la
+entrada ||--o| compra_la
+
+' --- Kiosko ---
+kiosko ||--o{ vende
+articulo ||--o{ vende
+proveedor ||--o{ provee
+kiosko ||--o{ provee
+empleado ||--o{ trabaja_en
+kiosko ||--o{ trabaja_en
+kiosko ||--o{ compra_en
+cliente ||--o{ compra_en
+
+' --- Restricciones clave ---
+note right of proyeccion
+  **R-01** EXCLUDE USING gist
+  (nro_sala WITH =,
+   rango_ocupacion WITH &&)
+  Una sala no aloja dos funciones
+  solapadas en el tiempo.
+end note
+
+note right of entrada
+  **R-02** UNIQUE
+  (nro_sala, id_funcion, nro_asiento)
+  FK compuesta → proyeccion:
+  el asiento pertenece a una
+  sala física concreta.
+end note
+
+note bottom of empleado
+  **R-08** Índice único parcial:
+  un gerente por sucursal
+  (WHERE empleado = 'gerente')
+end note
+
+note bottom of cartelera
+  EXCLUDE USING gist:
+  sin períodos solapados
+  por sucursal
+end note
+
+@enduml
