@@ -46,13 +46,15 @@ postgresql-business-rules/
 ├── diagramas/
 │   ├── der.puml                    # Código fuente PlantUML del Modelo Entidad-Relación
 │   ├── der.png                     # Render gráfico de alta resolución para el README
-│   └── flujo-reglas.puml           # Diagrama de secuencia/flujo de validación en motor
+│   ├── flujo-reglas.puml           # Diagrama de secuencia/flujo de validación en motor
+│   └── flujo-reglas.png            # Render del flujo
 │
 ├── sql/
 │   ├── 01-schema.sql               # Extensiones, tipos, dominios, tablas 3FN, PK/FK, CHECK y GiST
 │   ├── 02-functions.sql            # Funciones PL/pgSQL con SECURITY INVOKER y control de excepciones
 │   ├── 03-triggers.sql             # Triggers documentados vinculados a eventos del ciclo de vida
 │   ├── 04-seed.sql                 # Datos sintéticos idempotentes y coherentes
+│   ├── 05-views.sql                # Vistas operativas de consulta
 │   └── 99-drop.sql                 # Script de limpieza limpia en cascada inversa
 │
 ├── tests/
@@ -146,40 +148,32 @@ postgresql-business-rules/
   - El healthcheck usa `pg_isready` **por TCP**: durante la inicialización el servidor temporal solo escucha por socket, así que el contenedor queda `healthy` recién cuando terminó de cargar el seed. Así `up --wait` no devuelve el control antes de tiempo.
   - Sin `TZ`/`PGTZ`: la zona horaria queda fijada en la base por `01-schema.sql`.
 - [x] Crear `Makefile`: `help` (por defecto), `up` (`up -d --wait`), `down`, `reset`, `test` (`SUITES="02 03"` para elegir, `NO_COLOR=1`), `psql`, `logs`, `clean` (`down -v`).
-- [x] Crear `scripts/init-db.sh` (carga 01–04 en la primera inicialización), `scripts/reset-db.sh` (99-drop + 01–04) y `scripts/run-tests.sh` (reset + suites coloreadas, código ≠ 0 si alguna falla, código 2 si la suite pedida no existe). Todos corren dentro del contenedor: el host solo necesita Docker y `make`.
+- [x] Crear `scripts/init-db.sh` (carga 01–05 en la primera inicialización), `scripts/reset-db.sh` (99-drop + 01–05) y `scripts/run-tests.sh` (reset + suites coloreadas, código ≠ 0 si alguna falla, código 2 si la suite pedida no existe). Todos corren dentro del contenedor: el host solo necesita Docker y `make`.
 - [x] Verificado: `make clean && make up` en 5,3 s; `make test` completo (reset + 68 aserciones) en 2,6 s; `down`/`up` conserva los datos; con los triggers originales el runner reporta las suites con fallas y sale con código 1.
 
 ### Fase 6: Documentación Técnica, Diagramas y Sanitización
 
+**Vistas** (surgió de la revisión de `migracion-del-modelo.md`, que prometía integrar `sql consultas` como vistas)
+- [x] Crear `sql/05-views.sql` con `v_programacion` (incluye ocupación por sala y reemplaza la consulta de sucursales por película, que usaba la tabla `proyecta`), `v_publicidad_por_funcion`, `v_gerente_por_sucursal` y `v_limpieza_por_sala`, todas con `security_invoker`. Se cargan en `init-db.sh` y `reset-db.sh`, y se eliminan en `99-drop.sql`.
+- [x] Prueba P-17 (6 aserciones). La batería pasa a **74 aserciones** (36 + 29 + 9).
+
 **Diagramas**
-- [ ] Crear `diagramas/der.puml` con el modelo relacional final (22 tablas), incluyendo `proyeccion` como asociación física función–sala y `entrada → proyeccion` por FK compuesta.
-- [ ] Generar imagen `diagramas/der.png`.
-- [ ] Crear `diagramas/flujo-reglas.puml`: cadena de triggers `compone → espacio_publicitario → funcion → proyeccion → EXCLUDE gist`, que es la que resolvió los bugs de propagación.
+- [x] `diagramas/der.puml` + `der.png`: las 22 tablas en 5 paquetes (Organización, Programación, Publicidad, Venta, Kiosko), con notas sobre R-01, R-02, R-08 y la exclusión de cartelera. Se renderiza con la imagen `plantuml/plantuml` y `PLANTUML_LIMIT_SIZE=16384`: con el límite por defecto (4096 px) el PNG salía recortado.
+- [x] `diagramas/flujo-reglas.puml` + `flujo-reglas.png`: diagrama de secuencia de la cadena `compone → espacio_publicitario → funcion → proyeccion → EXCLUDE gist`, con los dos puntos de rechazo (`23514`, `23P01`).
 
 **Documentación**
-- [ ] Redactar `docs/modelo-conceptual.md` (entidades, dominios, cardinalidades, diccionario).
-- [ ] Redactar `docs/reglas-de-negocio.md`: matriz Regla → Objeto SQL → SQLSTATE → Tests (P-xx / N-xx / C-xx). Los IDs de prueba ya están definidos en `tests/`.
-- [ ] Redactar `docs/decisiones-tecnicas.md` con ADRs:
-  - GiST `EXCLUDE` vs trigger de validación (el trigger no protege bajo concurrencia; demostrado en C-03).
-  - Rangos semiabiertos `[)` (contigüidad permitida: P-07 vs N-02).
-  - `timestamptz` + zona horaria fijada en la base vs `TIME` (cruce de medianoche: P-09, N-03).
-  - Atributos derivados no editables (`fecha_hora_fin`, `rango_ocupacion`).
-  - `WHEN (OLD IS DISTINCT FROM NEW)` vs `UPDATE OF`: los triggers BEFORE modifican columnas que `UPDATE OF` no ve.
-  - Propagación en cascada con un UPDATE no-op (`SET cod_espacio = cod_espacio`) para reutilizar las validaciones existentes.
-  - SQLSTATE estándar en `RAISE` (`23514`, `23503`) + fragmento de mensaje para distinguir reglas.
-  - `dblink` para probar concurrencia real en SQL puro.
-- [ ] Corregir `docs/migracion-del-modelo.md`, que quedó desalineado con la implementación:
-  - Menciona `publicar_cartelera()`; la función real es `fn_validar_cartelera_publicable(integer)`.
-  - Menciona el índice `sucursal_gerente_unico_idx`; el real es `empleado_gerente_por_sucursal_uidx`.
-  - Dice que `sql consultas` "se integran como vistas operativas"; todavía no existen. Decidir entre crear `sql/05-vistas.sql` o quitar la mención.
-  - Agregar las correcciones de la Fase 4 (propagación y atributos derivados).
-- [ ] Redactar `README.md` final: tesis, DER, matriz de reglas, snippets clave (EXCLUDE gist, trigger de fin, cadena de propagación), quickstart (`make up && make test`) y salida de ejemplo de la batería (68 aserciones).
+- [x] `docs/modelo-conceptual.md`: función vs. proyección, cardinalidades, enums, dominios, diccionario de datos y zona horaria.
+- [x] `docs/reglas-de-negocio.md`: matriz de 16 reglas (R-01…R-16): mecanismo, objeto SQL, SQLSTATE y pruebas. R-01 a R-10 conservan la numeración de los comentarios del código; R-11 a R-16 son nuevas. Los nombres de restricciones citados se verificaron contra la base.
+- [x] `docs/decisiones-tecnicas.md`: 11 ADRs. ADR-02 aclara que C-03 demuestra que la exclusión GiST resiste la concurrencia; la falla del trigger de validación bajo `READ COMMITTED` se fundamenta, pero no está demostrada con una prueba.
+- [x] `docs/migracion-del-modelo.md` corregido: `fn_validar_cartelera_publicable`, `empleado_gerente_por_sucursal_uidx`, vistas de `05-views.sql`, duraciones en enteros y nueva sección F con enlace a los bugs.
+- [x] `README.md`: tesis, qué demuestra, DER, matriz resumida, snippets (GiST, trigger de fin, propagación, concurrencia), la historia de los bugs, uso con `make`, estructura. Los ejemplos de consulta se probaron contra la base.
+- [x] `LICENSE` MIT.
 
 **Portafolio** (`/home/micaela/cuaderno/emprendimiento/portafolio/caso-03-modelo-logica-bd-postgresql.md`)
-- [ ] Unificar la numeración: el archivo es `caso-03` pero el título dice "Caso 2" (igual que este plan).
-- [ ] Unificar el nombre del repo: el documento usa `diseno-reglas-negocio-postgresql`; el remoto real es `postgresql-business-rules`.
-- [ ] Actualizar el DER y los snippets al modelo implementado: `ticket`/`butaca` → `entrada` (asiento como número validado contra `sala.cant_asientos`); `rango_ocupacion` derivado por trigger; `fn_calcular_fin_funcion` suma también el espacio publicitario; columnas `codigo_pelicula`/`codigo_cartelera`.
-- [ ] Actualizar la estructura de repositorio (agregar `tests/00-helpers.sql`, `tests/03-concurrencia.sql`, `docs/migracion-del-modelo.md`, `scripts/reset-db.sh`).
+- [x] Nombre del repo unificado (`postgresql-business-rules`) y enlace a este plan.
+- [x] DER (mermaid) y snippets actualizados al modelo implementado: `entrada` en lugar de `ticket`/`butaca`, `rango_ocupacion` derivado, `fn_calcular_fin_funcion` con publicidad y trigger de propagación con `WHEN`.
+- [x] Estructura del repo, sección de pruebas con salida real y estado actual.
+- [~] Numeración: el título queda como **Caso 2**, en línea con `actualizacion-proyectos.md`, donde el Caso 3 es el de BI. El nombre del archivo (`caso-03-…`) no se cambió: nada lo enlaza, pero la nomenclatura de la carpeta es decisión propia (mezcla `caso-01`, `caso-03`, `caso-C`).
 
 **Sanitización y publicación**
 - [ ] ⚠️ El PDF `Trabajo Practico Integrador - grupo  9.pdf`, `backup`, `sql ddl`, `sql insert`, `sql consultas` y `modelo conceptual.drawio` están en el commit `4a939d5`, **ya pusheado a `origin/main`**. Borrarlos en un commit nuevo no los saca del historial. Opciones:
@@ -195,7 +189,7 @@ postgresql-business-rules/
 
 El Caso 2 se considera completado y listo para vincular en el portafolio cuando:
 1. `docker compose up -d` inicie PostgreSQL 16 sin intervención manual.
-2. `make reset` ejecute en orden `01-schema.sql`, `02-functions.sql`, `03-triggers.sql` y `04-seed.sql` sin errores ni advertencias.
+2. `make reset` ejecute en orden `01-schema.sql`, `02-functions.sql`, `03-triggers.sql`, `04-seed.sql` y `05-views.sql` sin errores ni advertencias.
 3. `make test` ejecute todas las pruebas positivas y negativas, verificando que los errores rechazados capturen exactamente los `ERRCODE` esperados.
 4. El repositorio no contenga ningún rastro de nombres de docentes ni referencias a trabajos prácticos universitarios.
 5. El `README.md` exponga el DER visual, la tesis técnica, la matriz de reglas y los snippets de código clave.
