@@ -1,0 +1,36 @@
+# ============================================================================
+# Laboratorio PostgreSQL — Cadena de Cines Sunstar
+# Levantar con `make up` (o `docker compose up -d --wait`).
+# Las credenciales son de laboratorio local; pueden sobrescribirse con un .env.
+# ============================================================================
+name: postgresql-business-rules
+
+services:
+  db:
+    image: postgres:16-alpine
+    container_name: sunstar-db
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-sunstar}
+      POSTGRES_USER: ${POSTGRES_USER:-postgres}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
+    ports:
+      # 5433 en el host para no chocar con un PostgreSQL local en 5432
+      - "127.0.0.1:${POSTGRES_PORT:-5433}:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+      - ./sql:/lab/sql:ro
+      - ./tests:/lab/tests:ro
+      - ./scripts:/lab/scripts:ro
+      # Carga schema, funciones, triggers y seed en la primera inicialización
+      - ./scripts/init-db.sh:/docker-entrypoint-initdb.d/init-db.sh:ro
+    healthcheck:
+      # Por TCP a propósito: durante la inicialización el servidor temporal
+      # solo escucha por socket, así que el contenedor recién queda "healthy"
+      # cuando terminó de cargar el seed.
+      test: ["CMD-SHELL", "pg_isready -h 127.0.0.1 -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+      interval: 2s
+      timeout: 3s
+      retries: 30
+
+volumes:
+  pgdata:
