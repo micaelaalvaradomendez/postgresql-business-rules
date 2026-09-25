@@ -174,7 +174,7 @@ SELECT pg_temp.assert_rechaza(
     'N-20 Segundo gerente en la sucursal Abasto',
     $$INSERT INTO empleado (dni, id_sucursal, empleado, nombre, apellido, telefono, mail, calle, numero)
       VALUES (43000111, 1, 'gerente', 'Ana', 'Duplicada', '011-5555-9999',
-              'ana.duplicada@sunstar.com', 'Rivadavia', 100)$$,
+              'ana.duplicada@sunstar.example', 'Rivadavia', 100)$$,
     '23505', 'empleado_gerente_por_sucursal_uidx');
 
 SELECT pg_temp.assert_rechaza(

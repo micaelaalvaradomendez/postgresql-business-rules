@@ -4,6 +4,10 @@
 -- ARCHIVO: sql/04-seed.sql
 -- DESCRIPCIÓN: Datos sintéticos consistentes, trazables e independientes de
 --              IDs fijos asumidos. Demuestra escenarios de negocio clave.
+--              Personas, direcciones, teléfonos y CUIT son ficticios. Los mails
+--              usan dominios reservados para ejemplos (RFC 2606: .example,
+--              example.com). No es idempotente por sí solo: se recarga con
+--              `make reset` (99-drop + 01..05).
 -- ============================================================================
 
 -- ----------------------------------------------------------------------------
@@ -11,9 +15,9 @@
 -- ----------------------------------------------------------------------------
 INSERT INTO sucursal (nombre, telefono, ciudad, calle, numero_de_calle)
 VALUES
-    ('Sunstar Shopping Abasto', '011-4861-1000', 'Buenos Aires', 'Avenida Corrientes', 3247),
-    ('Sunstar Rosario Centro',  '0341-420-2000', 'Rosario',       'Peatonal Córdoba',   1450),
-    ('Sunstar Córdoba Mall',    '0351-470-3000', 'Córdoba',       'Duarte Quirós',      1400);
+    ('Sunstar Shopping Abasto', '011-5555-1000', 'Buenos Aires', 'Avenida del Sol',    1200),
+    ('Sunstar Rosario Centro',  '0341-555-2000', 'Rosario',       'Calle de los Álamos', 450),
+    ('Sunstar Córdoba Mall',    '0351-555-3000', 'Córdoba',       'Boulevard Central',   780);
 
 -- ----------------------------------------------------------------------------
 -- 2. EMPLEADOS (1 Gerente por sucursal + personal operativo)
@@ -23,31 +27,31 @@ INSERT INTO empleado (dni, id_sucursal, empleado, nombre, apellido, telefono, ma
 VALUES
     -- Gerentes (1 por sede)
     (28111222, (SELECT id_sucursal FROM sucursal WHERE nombre = 'Sunstar Shopping Abasto'),
-     'gerente', 'Martín', 'Palermo', '011-5555-0101', 'martin.palermo@sunstar.com', 'Av. Santa Fe', 2100, 'C1425'),
+     'gerente', 'Sofía', 'Herrera', '011-5555-0101', 'sofia.herrera@sunstar.example', 'Av. Santa Fe', 2100, 'C1425'),
     (29333444, (SELECT id_sucursal FROM sucursal WHERE nombre = 'Sunstar Rosario Centro'),
-     'gerente', 'Luciana', 'Aymar', '0341-555-0202', 'luciana.aymar@sunstar.com', 'Bv. Oroño', 850, 'S2000'),
+     'gerente', 'Tomás', 'Aguirre', '0341-555-0202', 'tomas.aguirre@sunstar.example', 'Bv. Oroño', 850, 'S2000'),
     (30555666, (SELECT id_sucursal FROM sucursal WHERE nombre = 'Sunstar Córdoba Mall'),
-     'gerente', 'David', 'Nalbandian', '0351-555-0303', 'david.nalbandian@sunstar.com', 'Av. Colón', 1200, 'X5000'),
+     'gerente', 'Valentina', 'Ibarra', '0351-555-0303', 'valentina.ibarra@sunstar.example', 'Av. Colón', 1200, 'X5000'),
 
     -- Personal de atención al cliente (Kiosko y taquilla)
     (35123456, (SELECT id_sucursal FROM sucursal WHERE nombre = 'Sunstar Shopping Abasto'),
-     'atencion_al_cliente', 'Facundo', 'Gómez', '011-5555-0404', 'facundo.gomez@sunstar.com', 'Lavalle', 1500, 'C1048'),
+     'atencion_al_cliente', 'Facundo', 'Gómez', '011-5555-0404', 'facundo.gomez@sunstar.example', 'Lavalle', 1500, 'C1048'),
     (36234567, (SELECT id_sucursal FROM sucursal WHERE nombre = 'Sunstar Shopping Abasto'),
-     'atencion_al_cliente', 'Camila', 'Torres', '011-5555-0505', 'camila.torres@sunstar.com', 'Tucumán', 1800, 'C1050'),
+     'atencion_al_cliente', 'Camila', 'Torres', '011-5555-0505', 'camila.torres@sunstar.example', 'Tucumán', 1800, 'C1050'),
     (37345678, (SELECT id_sucursal FROM sucursal WHERE nombre = 'Sunstar Rosario Centro'),
-     'atencion_al_cliente', 'Franco', 'Ríos', '0341-555-0606', 'franco.rios@sunstar.com', 'San Lorenzo', 1100, 'S2000'),
+     'atencion_al_cliente', 'Franco', 'Ríos', '0341-555-0606', 'franco.rios@sunstar.example', 'San Lorenzo', 1100, 'S2000'),
     (38456789, (SELECT id_sucursal FROM sucursal WHERE nombre = 'Sunstar Córdoba Mall'),
-     'atencion_al_cliente', 'Julieta', 'Pérez', '0351-555-0707', 'julieta.perez@sunstar.com', 'Ituzaingó', 450, 'X5000'),
+     'atencion_al_cliente', 'Julieta', 'Pérez', '0351-555-0707', 'julieta.perez@sunstar.example', 'Ituzaingó', 450, 'X5000'),
 
     -- Personal de limpieza
     (39567890, (SELECT id_sucursal FROM sucursal WHERE nombre = 'Sunstar Shopping Abasto'),
-     'limpieza', 'Esteban', 'Quito', '011-5555-0808', 'esteban.quito@sunstar.com', 'Sarmiento', 2200, 'C1044'),
+     'limpieza', 'Esteban', 'Ruiz', '011-5555-0808', 'esteban.ruiz@sunstar.example', 'Sarmiento', 2200, 'C1044'),
     (40678901, (SELECT id_sucursal FROM sucursal WHERE nombre = 'Sunstar Shopping Abasto'),
-     'limpieza', 'Romina', 'Vargas', '011-5555-0909', 'romina.vargas@sunstar.com', 'Anchorena', 650, 'C1170'),
+     'limpieza', 'Romina', 'Vargas', '011-5555-0909', 'romina.vargas@sunstar.example', 'Anchorena', 650, 'C1170'),
     (41789012, (SELECT id_sucursal FROM sucursal WHERE nombre = 'Sunstar Rosario Centro'),
-     'limpieza', 'Joaquín', 'Díaz', '0341-555-1010', 'joaquin.diaz@sunstar.com', 'Mitre', 900, 'S2000'),
+     'limpieza', 'Joaquín', 'Díaz', '0341-555-1010', 'joaquin.diaz@sunstar.example', 'Mitre', 900, 'S2000'),
     (42890123, (SELECT id_sucursal FROM sucursal WHERE nombre = 'Sunstar Córdoba Mall'),
-     'limpieza', 'Silvia', 'Molina', '0351-555-1111', 'silvia.molina@sunstar.com', 'Chacabuco', 300, 'X5000');
+     'limpieza', 'Silvia', 'Molina', '0351-555-1111', 'silvia.molina@sunstar.example', 'Chacabuco', 300, 'X5000');
 
 -- ----------------------------------------------------------------------------
 -- 3. SALAS DE CINE (Diversidad tecnológica y aforos)
@@ -82,9 +86,9 @@ VALUES
 -- ----------------------------------------------------------------------------
 INSERT INTO proveedor (cuit, mail, nombre, descripcion)
 VALUES
-    (30711223344, 'ventas@snackspop.com.ar',     'Snacks Pop Argentina',      'Maíz pisingallo, aceites y saborizantes'),
-    (30722334455, 'contacto@bebidasdelsur.com',  'Distribuidora Bebidas Sur', 'Gaseosas, aguas saborizadas y energizantes'),
-    (30733445566, 'pedidos@dulcesgolocine.com',  'GoloCine Golosinas',        'Chocolates, gomitas y confites premium');
+    (30000000011, 'ventas@snacks.example',       'Snacks Pop Argentina',      'Maíz pisingallo, aceites y saborizantes'),
+    (30000000022, 'contacto@bebidas.example',    'Distribuidora Bebidas Sur', 'Gaseosas, aguas saborizadas y energizantes'),
+    (30000000033, 'pedidos@golosinas.example',   'GoloCine Golosinas',        'Chocolates, gomitas y confites premium');
 
 INSERT INTO articulo (codigo, nombre, precio)
 VALUES
@@ -112,11 +116,11 @@ CROSS JOIN kiosko k;
 -- ----------------------------------------------------------------------------
 INSERT INTO cliente (dni, mail)
 VALUES
-    (32111001, 'marina.salvatierra@gmail.com'),
-    (33222002, 'rodrigo.benitez@hotmail.com'),
-    (34333003, 'valeria.gutierrez@yahoo.com.ar'),
-    (35444004, 'pablo.marmol@outlook.com'),
-    (36555005, 'laura.castro@gmail.com');
+    (32111001, 'cliente01@example.com'),
+    (33222002, 'cliente02@example.com'),
+    (34333003, 'cliente03@example.com'),
+    (35444004, 'cliente04@example.com'),
+    (36555005, 'cliente05@example.com');
 
 -- ----------------------------------------------------------------------------
 -- 7. PELÍCULAS
@@ -304,13 +308,13 @@ VALUES
 -- Vinculación de entradas a clientes que las compraron
 INSERT INTO compra_la (id_cliente, id_entrada)
 VALUES
-    ((SELECT id_cliente FROM cliente WHERE mail = 'marina.salvatierra@gmail.com'), 1),
-    ((SELECT id_cliente FROM cliente WHERE mail = 'marina.salvatierra@gmail.com'), 2),
-    ((SELECT id_cliente FROM cliente WHERE mail = 'rodrigo.benitez@hotmail.com'),  3),
-    ((SELECT id_cliente FROM cliente WHERE mail = 'valeria.gutierrez@yahoo.com.ar'), 4),
-    ((SELECT id_cliente FROM cliente WHERE mail = 'valeria.gutierrez@yahoo.com.ar'), 5),
-    ((SELECT id_cliente FROM cliente WHERE mail = 'pablo.marmol@outlook.com'),     6),
-    ((SELECT id_cliente FROM cliente WHERE mail = 'laura.castro@gmail.com'),       7);
+    ((SELECT id_cliente FROM cliente WHERE mail = 'cliente01@example.com'), 1),
+    ((SELECT id_cliente FROM cliente WHERE mail = 'cliente01@example.com'), 2),
+    ((SELECT id_cliente FROM cliente WHERE mail = 'cliente02@example.com'),  3),
+    ((SELECT id_cliente FROM cliente WHERE mail = 'cliente03@example.com'), 4),
+    ((SELECT id_cliente FROM cliente WHERE mail = 'cliente03@example.com'), 5),
+    ((SELECT id_cliente FROM cliente WHERE mail = 'cliente04@example.com'),     6),
+    ((SELECT id_cliente FROM cliente WHERE mail = 'cliente05@example.com'),       7);
 
 -- ----------------------------------------------------------------------------
 -- 13. ASIGNACIONES OPERATIVAS RESTANTES

@@ -53,7 +53,7 @@ postgresql-business-rules/
 │   ├── 01-schema.sql               # Extensiones, tipos, dominios, tablas 3FN, PK/FK, CHECK y GiST
 │   ├── 02-functions.sql            # Funciones PL/pgSQL con SECURITY INVOKER y control de excepciones
 │   ├── 03-triggers.sql             # Triggers documentados vinculados a eventos del ciclo de vida
-│   ├── 04-seed.sql                 # Datos sintéticos idempotentes y coherentes
+│   ├── 04-seed.sql                 # Datos sintéticos ficticios y coherentes (recargables con make reset)
 │   ├── 05-views.sql                # Vistas operativas de consulta
 │   └── 99-drop.sql                 # Script de limpieza limpia en cascada inversa
 │
@@ -123,6 +123,7 @@ postgresql-business-rules/
   - Configurar publicidades y componer espacios publicitarios balanceados.
   - Programar carteleras y funciones que demuestren proyecciones simultáneas válidas y consecutivas.
   - Registrar ventas de entradas ordinarias.
+- [x] Reemplazar los datos con apariencia real por datos ficticios, según `criterios-publicacion-segura.md`: gerentes con nombres de deportistas conocidos, mails en dominios reales (gmail, hotmail…), direcciones y teléfonos reales de sucursales, CUIT y dominios de proveedores. Ahora los mails usan dominios reservados (`.example`, `example.com`).
 - [x] Sincronizar la secuencia identity de `espacio_publicitario` tras la carga con `OVERRIDING SYSTEM VALUE` (sin esto, la siguiente alta colisionaba con la PK; test P-13).
 
 ### Fase 4: Batería de Pruebas Automatizadas
