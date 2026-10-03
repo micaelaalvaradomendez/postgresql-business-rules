@@ -1,5 +1,7 @@
 # Reglas de negocio en PostgreSQL
 
+[![Tests](https://github.com/micaelaalvaradomendez/postgresql-business-rules/actions/workflows/tests.yml/badge.svg)](https://github.com/micaelaalvaradomendez/postgresql-business-rules/actions/workflows/tests.yml)
+
 **Automatización e integridad transaccional en PostgreSQL 16: normalización 3FN, restricciones de exclusión GiST y triggers PL/pgSQL.**
 
 Una base de datos para una cadena de cines (programación de funciones, salas físicas, publicidad y venta de entradas) donde **las reglas de negocio críticas las garantiza el motor**, no la aplicación. Ningún cliente puede saltearlas y resisten la concurrencia: dos ventas simultáneas del mismo asiento o dos funciones solapadas en la misma sala se rechazan aunque lleguen al mismo tiempo.

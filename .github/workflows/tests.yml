@@ -1,0 +1,24 @@
+name: Tests
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  sql-tests:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Ejecutar batería de pruebas
+        run: make test NO_COLOR=1
+
+      - name: Logs del contenedor ante fallas
+        if: failure()
+        run: docker compose logs db
+
+      - name: Detener entorno
+        if: always()
+        run: make clean
