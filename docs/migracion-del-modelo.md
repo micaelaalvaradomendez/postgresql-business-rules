@@ -6,14 +6,16 @@ Este documento registra el inventario del material de origen, el diagnóstico t�
 
 ## 1. Inventario de Artefactos de Origen
 
+Los artefactos de origen no forman parte del repositorio público: se usaron como insumo y quedan archivados fuera de él. Esta tabla documenta qué contenía cada uno y dónde quedó reflejado.
+
 | Artefacto Original | Contenido Principal | Tratamiento en la Migración |
 |---|---|---|
-| `sql ddl` | Definición de tipos ENUM, dominios regex, tablas, PK/FK y 5 triggers. | Se refactoriza y descompone en `sql/01-schema.sql`, `sql/02-functions.sql` y `sql/03-triggers.sql`. |
-| `sql insert` | Inserciones de prueba con IDs numéricos asumidos y parches de actualización (`UPDATE funcion`). | Se reemplaza por `sql/04-seed.sql` estructurado, trazable y con relaciones consistentes. |
-| `sql consultas` | 4 consultas de ejemplo del modelo original. | Se integran como vistas operativas en `sql/05-views.sql` (`v_programacion`, `v_publicidad_por_funcion`, `v_gerente_por_sucursal`, `v_limpieza_por_sala`), verificadas por la prueba P-17. La consulta de sucursales por película usaba la tabla `proyecta`, que ya no existe; ahora es `SELECT DISTINCT sucursal FROM v_programacion WHERE pelicula = ...`. |
-| `modelo conceptual.drawio` | Diagramas conceptual y lógico de 2 páginas en formato Draw.io. | Se traduce a código fuente declarativo PlantUML (`diagramas/der.puml`) y se compila a imagen (`diagramas/der.png`). |
-| `backup` | Respaldo binario en formato personalizado de PostgreSQL 16.4 (`pg_dump -Fc`). | Se conserva como archivo de solo lectura de respaldo histórico. |
-| `Trabajo Practico Integrador - grupo  9.pdf` | Especificación del Universo del Discurso y decisiones de modelado iniciales. | Se utiliza como insumo de reglas de negocio y se retira antes del release público (sanitización de marcas académicas). |
+| Script DDL | Definición de tipos ENUM, dominios regex, tablas, PK/FK y 5 triggers. | Se refactoriza y descompone en `sql/01-schema.sql`, `sql/02-functions.sql` y `sql/03-triggers.sql`. |
+| Script de inserciones | Inserciones de prueba con IDs numéricos asumidos y parches de actualización (`UPDATE funcion`). | Se reemplaza por `sql/04-seed.sql` estructurado, trazable y con relaciones consistentes. |
+| Script de consultas | 4 consultas de ejemplo del modelo original. | Se integran como vistas operativas en `sql/05-views.sql` (`v_programacion`, `v_publicidad_por_funcion`, `v_gerente_por_sucursal`, `v_limpieza_por_sala`), verificadas por la prueba P-17. La consulta de sucursales por película usaba la tabla `proyecta`, que ya no existe; ahora es `SELECT DISTINCT sucursal FROM v_programacion WHERE pelicula = ...`. |
+| Modelo en Draw.io | Diagramas conceptual y lógico de 2 páginas. | Se traduce a código fuente declarativo PlantUML (`diagramas/der.puml`) y se compila a imagen (`diagramas/der.png`). |
+| Respaldo `pg_dump -Fc` | Respaldo binario de PostgreSQL 16.4. | Redundante con `sql/`: la base se reconstruye por completo con `make reset`. |
+| Especificación del dominio | Universo del discurso y decisiones de modelado iniciales. | Se utiliza como insumo de reglas de negocio (`docs/reglas-de-negocio.md`). |
 
 ---
 
